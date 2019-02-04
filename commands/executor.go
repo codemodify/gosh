@@ -13,10 +13,12 @@ func NewExecutor(commands []Command) *Executor {
 }
 
 // Execute -
-func (thisRef *Executor) Execute(command string) {
+func (thisRef *Executor) Execute(command string) error {
 	for _, v := range thisRef.commands {
 		if v.CanHandle(command) {
-			v.Execute(command)
+			return v.Execute(command)
 		}
 	}
+
+	return nil
 }

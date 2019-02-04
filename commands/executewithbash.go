@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -21,12 +23,21 @@ func (thisRef *ExecuteWithBash) CanHandle(command string) bool {
 }
 
 // Execute -
-func (thisRef *ExecuteWithBash) Execute(command string) {
+func (thisRef *ExecuteWithBash) Execute(command string) error {
 	bashParams := strings.Replace(command, "-c", "", 1)
+
+	var customStdErr bytes.Buffer
 
 	cmd := exec.Command("bash", "-c", bashParams)
 	cmd.Env = os.Environ()
-	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = &customStdErr
 	cmd.Stdout = os.Stdout
-	cmd.Run()
+
+	err := cmd.Run()
+	if err != nil {
+		return errors.New(customStdErr.String())
+	}
+
+	return nil
 }
